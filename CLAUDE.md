@@ -127,10 +127,10 @@ ruff check . && ruff format .       # 린트/포맷 (hook이 자동 실행하지
 - 💡 실습 포인트: Claude에게 `data/raw/` 파일 수정이나 인증키 하드코딩을 시켜보고 **hook이 차단**하는 것을 확인
 
 ### 2단계 — 데이터 분석  `[Skills] [Subagents]`
-- [ ] 연도별 발생 건수 / 피해면적
-- [ ] 시도별 발생 건수 순위
-- [ ] 월별 발생 패턴 (봄철 집중 여부 확인)
-- [ ] (선택) 원인별 비중
+- [x] 연도별 발생 건수 / 피해면적 (`yearly_counts`)
+- [x] 시도별 발생 건수 순위 (`region_counts`)
+- [x] 월별 발생 패턴 (봄철 집중 여부 확인) (`monthly_pattern`) → 3~4월 46.1%
+- [x] (선택) 원인별 비중 (`cause_share`)
 - 💡 실습 포인트: `/wildfire-eda` 스킬로 정해진 절차의 EDA 실행, `data-analyst` 에이전트에게 인사이트 요약 위임
 
 ### 3단계 — 시각화  `[Skills] [Subagents]`
