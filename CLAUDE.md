@@ -111,6 +111,7 @@ CSV 파일 다운로드는 제공되지 않으며 **API 호출로만** 받는다
 
 ```bash
 pip install -r requirements.txt     # 의존성 설치
+pip install -r requirements-dev.txt # 개발용 의존성 (pytest, ruff)
 cp .env.example .env                # 환경설정 파일 생성 → 인증키는 사용자가 직접 입력
 python -m src.fetch_api --start-year 2015 --end-year 2024   # API 수집 → data/raw/
 streamlit run app.py                # 로컬 대시보드 실행 (http://localhost:8501)

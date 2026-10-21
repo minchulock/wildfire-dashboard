@@ -1,9 +1,10 @@
-requests
-python-dotenv
-pandas
-plotly
-folium
-streamlit
-streamlit-folium
-pytest
-ruff
+# 배포 앱(app.py, src/analysis·charts·insights·load) 실행에 필요한 패키지
+streamlit==1.66.0
+pandas==3.0.6
+plotly==7.1.0
+folium==0.20.0
+streamlit-folium==0.27.4
+
+# 데이터 수집 스크립트용 (src/fetch_api.py, src/config.py) - 배포 앱은 호출하지 않음
+requests==2.34.2
+python-dotenv==1.2.4
