@@ -33,14 +33,52 @@ def region_counts(df: pd.DataFrame, by: str = "sido") -> pd.DataFrame:
     return out
 
 
-def monthly_pattern(df: pd.DataFrame) -> pd.DataFrame:
-    """월별 연평균 발생 건수와 전체 대비 비중(%)을 반환한다."""
-    years = range(int(df["year"].min()), int(df["year"].max()) + 1)
+def monthly_pattern(df: pd.DataFrame, years: range | None = None) -> pd.DataFrame:
+    """월별 연평균 발생 건수와 전체 대비 비중(%)을 반환한다 (years: 평균을 낼 연도 범위)."""
+    if years is None:
+        years = range(int(df["year"].min()), int(df["year"].max()) + 1)
     grid = pd.MultiIndex.from_product([years, range(1, 13)], names=["year", "month"])
     per_year = df.groupby(["year", "month"]).size().reindex(grid, fill_value=0)
     out = per_year.groupby("month").mean().rename("avg_count").reset_index()
     out["share_pct"] = out["avg_count"] / out["avg_count"].sum() * 100
     return out
+
+
+def hourly_pattern(df: pd.DataFrame) -> pd.DataFrame:
+    """발생 시각(0~23시)별 건수와 비중(%)을 반환한다 (발생 없는 시각은 0)."""
+    out = (
+        df["start_at"]
+        .dt.hour.value_counts()
+        .reindex(range(24), fill_value=0)
+        .rename_axis("hour")
+        .reset_index(name="count")
+    )
+    out["share_pct"] = out["count"] / out["count"].sum() * 100
+    return out
+
+
+LARGE_FIRE_HA = 100  # 대형 산불 기준 (data-analyst 분석 기준과 동일)
+
+
+def kpi_summary(df: pd.DataFrame) -> dict:
+    """KPI 카드용 요약값: 총 건수·총 피해면적·최다 발생 시도·진화시간 중앙값·대형 산불."""
+    by_sido = region_counts(df)
+    large = df[df["damage_area_ha"] >= LARGE_FIRE_HA]
+    total_area = df["damage_area_ha"].sum()
+    return {
+        "count": len(df),
+        "damage_area_ha": total_area,
+        "top_sido": by_sido.iloc[0]["sido"],
+        "top_sido_count": int(by_sido.iloc[0]["count"]),
+        "top_damage_sido": by_sido.sort_values("damage_area_ha", ascending=False).iloc[
+            0
+        ]["sido"],
+        "median_duration_min": df["duration_min"].median(),
+        "large_count": len(large),
+        "large_area_share_pct": (
+            large["damage_area_ha"].sum() / total_area * 100 if total_area > 0 else 0.0
+        ),
+    }
 
 
 def cause_share(df: pd.DataFrame) -> pd.DataFrame:

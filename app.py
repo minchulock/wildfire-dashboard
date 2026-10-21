@@ -7,12 +7,29 @@ import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
 
-from src.analysis import region_counts, region_points, yearly_counts
+from src.analysis import (
+    LARGE_FIRE_HA,
+    hourly_pattern,
+    kpi_summary,
+    monthly_pattern,
+    region_counts,
+    region_points,
+    yearly_counts,
+)
 from src.charts import (
+    hourly_chart,
+    monthly_chart,
     region_map,
     sido_bar_chart,
     yearly_count_chart,
     yearly_damage_chart,
+)
+from src.insights import (
+    hourly_insight,
+    map_insight,
+    monthly_insight,
+    region_insight,
+    trend_insight,
 )
 from src.load import load_centroids, load_processed
 
@@ -27,6 +44,11 @@ def get_fires() -> pd.DataFrame:
 @st.cache_data
 def get_centroids() -> pd.DataFrame:
     return load_centroids()
+
+
+def show_insight(text: str, icon: str = "💡") -> None:
+    """인사이트 문구 표시. '3~4월 … 2~5월'의 ~ 두 개가 마크다운 취소선이 되지 않게 이스케이프."""
+    st.info(text.replace("~", r"\~"), icon=icon)
 
 
 fires = get_fires()
@@ -52,17 +74,50 @@ if filtered_df.empty:
     st.warning("선택한 조건에 해당하는 산불이 없습니다.")
     st.stop()
 
+years = range(year_range[0], year_range[1] + 1)
+
+# ── KPI 카드 ──
+kpi = kpi_summary(filtered_df)
+area = kpi["damage_area_ha"]
+c1, c2, c3, c4 = st.columns(4)
+c1.metric("총 발생 건수", f"{kpi['count']:,}건", border=True)
+c2.metric(
+    "총 피해면적",
+    f"{area / 10000:.1f}만ha" if area >= 10000 else f"{area:,.0f}ha",
+    help=f"{area:,.1f}ha",
+    border=True,
+)
+c3.metric(
+    "최다 발생 시도",
+    kpi["top_sido"],
+    f"{kpi['top_sido_count']:,}건",
+    delta_color="off",
+    delta_arrow="off",
+    border=True,
+)
+c4.metric(
+    f"대형 산불({LARGE_FIRE_HA}ha↑)",
+    f"{kpi['large_count']:,}건",
+    f"피해면적의 {kpi['large_area_share_pct']:.0f}%",
+    delta_color="off",
+    delta_arrow="off",
+    help=f"진화시간 중앙값 {kpi['median_duration_min']:,.0f}분",
+    border=True,
+)
+
 tab_trend, tab_region, tab_month, tab_map = st.tabs(
     ["추이", "지역", "월별 패턴", "지도"]
 )
 
 with tab_trend:
-    yearly = yearly_counts(filtered_df, range(year_range[0], year_range[1] + 1))
+    show_insight(trend_insight(filtered_df, years))
+    yearly = yearly_counts(filtered_df, years)
     left, right = st.columns(2)
     left.plotly_chart(yearly_count_chart(yearly), width="stretch")
     right.plotly_chart(yearly_damage_chart(yearly), width="stretch")
 
 with tab_region:
+    show_insight(region_insight(filtered_df))
     metric = st.radio(
         "기준",
         ["count", "damage_area_ha"],
@@ -81,9 +136,16 @@ with tab_region:
     st.plotly_chart(fig, width="stretch")
 
 with tab_month:
-    st.info("4단계에서 월별·시간대별 패턴 차트를 추가합니다.")
+    show_insight(monthly_insight(filtered_df, years))
+    show_insight(hourly_insight(filtered_df), icon="🕑")
+    left, right = st.columns(2)
+    left.plotly_chart(
+        monthly_chart(monthly_pattern(filtered_df, years)), width="stretch"
+    )
+    right.plotly_chart(hourly_chart(hourly_pattern(filtered_df)), width="stretch")
 
 with tab_map:
+    show_insight(map_insight(filtered_df))
     points = region_points(filtered_df, get_centroids())
     st_folium(
         region_map(points), height=600, use_container_width=True, returned_objects=[]

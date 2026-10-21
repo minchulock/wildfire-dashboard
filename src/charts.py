@@ -76,6 +76,47 @@ def yearly_damage_chart(yearly: pd.DataFrame) -> go.Figure:
     return _layout(fig, "연도별 산불 피해면적", "연도", "피해면적(ha)")
 
 
+def _highlight(values: pd.Series, keys: list) -> list[str]:
+    """강조할 구간은 PRIMARY, 나머지는 SECONDARY 색 (단일 시리즈 안에서의 강조)."""
+    return [PRIMARY if v in keys else SECONDARY for v in values]
+
+
+def monthly_chart(monthly: pd.DataFrame, highlight: tuple = (3, 4)) -> go.Figure:
+    """월별 연평균 발생 건수 막대, 봄철(기본 3~4월) 강조 (입력: monthly_pattern 결과)."""
+    fig = go.Figure(
+        go.Bar(
+            x=monthly["month"],
+            y=monthly["avg_count"],
+            marker_color=_highlight(monthly["month"], list(highlight)),
+            customdata=monthly["share_pct"],
+            hovertemplate="%{x}월: 연평균 %{y:,.1f}건 (%{customdata:.1f}%)<extra></extra>",
+        )
+    )
+    fig.update_xaxes(
+        tickmode="array",
+        tickvals=list(range(1, 13)),
+        ticktext=[f"{m}월" for m in range(1, 13)],
+    )
+    fig.update_yaxes(rangemode="tozero", tickformat=",.0f")
+    return _layout(fig, "월별 연평균 산불 발생 건수", "월", "연평균 발생 건수(건)")
+
+
+def hourly_chart(hourly: pd.DataFrame, highlight: range = range(11, 17)) -> go.Figure:
+    """발생 시각별 건수 막대, 낮 시간대(기본 11~16시) 강조 (입력: hourly_pattern 결과)."""
+    fig = go.Figure(
+        go.Bar(
+            x=hourly["hour"],
+            y=hourly["count"],
+            marker_color=_highlight(hourly["hour"], list(highlight)),
+            customdata=hourly["share_pct"],
+            hovertemplate="%{x}시: %{y:,}건 (%{customdata:.1f}%)<extra></extra>",
+        )
+    )
+    fig.update_xaxes(dtick=2)
+    fig.update_yaxes(**_count_axis(hourly["count"].max()))
+    return _layout(fig, "발생 시각별 산불 건수", "발생 시각(시)", "발생 건수(건)")
+
+
 SIDO_METRICS = {
     "count": ("발생 건수", "건"),
     "damage_area_ha": ("피해면적", "ha"),

@@ -45,7 +45,8 @@
 │   ├── fetch_api.py          # 1단계: 산불통계 OpenAPI 호출 → data/raw/ 저장
 │   ├── load.py               # 1단계: 원본 CSV 로딩
 │   ├── preprocess.py         # 1단계: 정제·파생 컬럼
-│   ├── analysis.py           # 2단계: 집계 함수
+│   ├── analysis.py           # 2단계: 집계 함수 (+4단계 hourly_pattern, kpi_summary)
+│   ├── insights.py           # 4단계: 탭별 인사이트 문구
 │   ├── build_centroids.py    # 3단계: 경계 GeoJSON → 시군구 중심 좌표 CSV
 │   └── charts.py             # 3단계: plotly/folium 차트 생성 함수
 ├── app.py                    # 4단계: Streamlit 진입점
@@ -145,8 +146,9 @@ ruff check . && ruff format .       # 린트/포맷 (hook이 자동 실행하지
 
 ### 4단계 — 웹 대시보드  `[MCP: Playwright, Context7]`
 - [x] `app.py`: 사이드바 필터(연도 범위 슬라이더, 시도 멀티셀렉트)
-- [ ] KPI 카드(총 건수, 총 피해면적, 최다 발생 시도)
-- [ ] 탭 구성: 추이 / 지역 / 월별 패턴 / 지도
+- [x] KPI 카드(총 건수, 총 피해면적, 최다 발생 시도, 대형 산불 100ha↑) — `analysis.kpi_summary`
+- [x] 탭 구성: 추이 / 지역 / 월별 패턴(월별·시간대) / 지도
+- [x] 탭별 인사이트 문구 (`src/insights.py`, data-analyst 제안 문구를 **필터 결과로 매번 다시 계산** — 고정 숫자 금지)
 - 💡 실습 포인트: Context7 MCP로 최신 Streamlit 문서 조회, Playwright MCP로 실행 중인 대시보드 화면 자동 점검
 
 ### 5단계 — 배포  `[MCP: GitHub] [Skills] [Subagents]`
