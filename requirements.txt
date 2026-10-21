@@ -1,0 +1,9 @@
+requests
+python-dotenv
+pandas
+plotly
+folium
+streamlit
+streamlit-folium
+pytest
+ruff
