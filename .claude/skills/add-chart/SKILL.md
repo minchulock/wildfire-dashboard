@@ -21,7 +21,7 @@ argument-hint: "[차트 설명, 예: 시도별 피해면적 막대 차트]"
 - 작은 가짜 DataFrame으로 함수 호출 → 반환 타입과 trace 개수를 확인한다.
 
 ## 3. 대시보드 연결 (`app.py`)
-- 알맞은 탭에 `st.plotly_chart(fig, use_container_width=True)` 또는 `st_folium(m)`으로 배치.
+- 알맞은 탭에 `st.plotly_chart(fig, width="stretch")` 또는 `st_folium(m)`으로 배치.
 - 사이드바 필터가 적용된 `filtered_df`를 사용하는지 확인한다.
 
 ## 4. 확인

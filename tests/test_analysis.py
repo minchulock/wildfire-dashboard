@@ -45,3 +45,18 @@ def test_cause_share(df):
     out = cause_share(df)
     assert out.iloc[0]["cause"] == "기타"
     assert out.iloc[0]["share_pct"] == pytest.approx(75)
+
+
+def test_yearly_counts_keeps_given_range(df):
+    out = yearly_counts(df, range(2018, 2025))
+    assert list(out["year"]) == list(range(2018, 2025))
+    assert out.set_index("year").loc[2024, "count"] == 0
+
+
+def test_region_counts_by_sigungu_fills_missing():
+    df = pd.DataFrame(
+        {"sigungu": ["제주", None, "제주"], "damage_area_ha": [1.0, 2.0, 3.0]}
+    )
+    out = region_counts(df, by="sigungu").set_index("sigungu")
+    assert out.loc["제주", "count"] == 2
+    assert out.loc["(미상)", "count"] == 1

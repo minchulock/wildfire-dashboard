@@ -7,6 +7,7 @@ import pandas as pd
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 RAW_DIR = DATA_DIR / "raw"
 PROCESSED_PATH = DATA_DIR / "processed" / "fires.csv"
+CENTROIDS_PATH = DATA_DIR / "reference" / "sigungu_centroids.csv"
 
 ENCODINGS = ("utf-8-sig", "cp949")
 
@@ -44,3 +45,12 @@ def load_processed(path: Path = PROCESSED_PATH) -> pd.DataFrame:
             f"{path} 가 없습니다. python -m src.preprocess 를 먼저 실행하세요."
         )
     return read_csv_auto(path, parse_dates=["start_at", "end_at"])
+
+
+def load_centroids(path: Path = CENTROIDS_PATH) -> pd.DataFrame:
+    """시군구 중심 좌표(통계청 2013 경계 기준)를 읽는다."""
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path} 가 없습니다. python -m src.build_centroids 를 먼저 실행하세요."
+        )
+    return read_csv_auto(path)

@@ -38,13 +38,15 @@
 │   └── agents/               # 역할별 서브에이전트
 ├── data/
 │   ├── raw/                  # API 수집 원본 CSV (fetch_api.py만 생성, 수정 금지! hook으로 보호됨)
-│   └── processed/            # 전처리 결과 (parquet/csv)
+│   ├── processed/            # 전처리 결과 (parquet/csv)
+│   └── reference/            # 시군구 경계 GeoJSON·중심 좌표 (지도용)
 ├── src/
 │   ├── config.py             # 1단계: 환경변수(.env / Streamlit secrets) 로딩
 │   ├── fetch_api.py          # 1단계: 산불통계 OpenAPI 호출 → data/raw/ 저장
 │   ├── load.py               # 1단계: 원본 CSV 로딩
 │   ├── preprocess.py         # 1단계: 정제·파생 컬럼
 │   ├── analysis.py           # 2단계: 집계 함수
+│   ├── build_centroids.py    # 3단계: 경계 GeoJSON → 시군구 중심 좌표 CSV
 │   └── charts.py             # 3단계: plotly/folium 차트 생성 함수
 ├── app.py                    # 4단계: Streamlit 진입점
 ├── tests/                    # pytest
@@ -90,7 +92,9 @@ CSV 파일 다운로드는 제공되지 않으며 **API 호출로만** 받는다
 - **진화시간**: 음수(종료 `00:00:00` 기록) 또는 30일 초과(종료연도 오타)는 `duration_min` 결측 처리 (2015~2024 기준 27건). 행은 삭제하지 않는다.
 - **지역 키**: `광주`처럼 시도·시군구 이름이 겹치므로 시군구 단위 집계·지도는 `region`(`"시도 시군구"`) 컬럼을 쓴다.
 - **시도명 표준화**: `강원` / `강원도` / `강원특별자치도` 처럼 표기가 섞여 있으면 하나로 통일한다(`SIDO_NORMALIZE` 딕셔너리).
-- **좌표**: API 응답에는 위경도가 없으므로 시군구 단위 중심 좌표 테이블(`data/raw/sigungu_centroids.csv`)과 조인한다. 좌표를 지어내지 않는다.
+- **좌표**: API 응답에는 위경도가 없으므로 시군구 중심 좌표(`data/reference/sigungu_centroids.csv`)와 조인한다. 좌표를 지어내지 않는다.
+  - 출처: 통계청 2013 시군구 경계([southkorea-maps](https://github.com/southkorea/southkorea-maps)) → `python -m src.build_centroids`로 생성
+  - 매칭 규칙(`analysis.region_points`): 정확히 일치 → 별칭(`대구 군위`→2013 `경북 군위`) → 2013년 이후 신설 일반구는 상위 시(예: `청주 청원`→`청주`). 세종은 읍면 이름이 들어오거나 비어 있으므로 세종 중심 1곳에 표시
 - **결측치**: 삭제 전에 몇 건이 빠지는지 반드시 출력/보고한다.
 
 ## 5. 코딩 규칙
@@ -134,13 +138,13 @@ ruff check . && ruff format .       # 린트/포맷 (hook이 자동 실행하지
 - 💡 실습 포인트: `/wildfire-eda` 스킬로 정해진 절차의 EDA 실행, `data-analyst` 에이전트에게 인사이트 요약 위임
 
 ### 3단계 — 시각화  `[Skills] [Subagents]`
-- [ ] 연도별 추이 라인 차트
-- [ ] 시도별 막대 차트
-- [ ] folium 지도 (시군구 중심 좌표 버블/히트맵)
+- [x] 연도별 추이 라인 차트 (건수 라인 + 피해면적 막대, 이중축 대신 2개 차트)
+- [x] 시도별 막대 차트 (건수/피해면적 전환)
+- [x] folium 지도 (시군구 중심 좌표 버블, 반지름 ∝ √건수)
 - 💡 실습 포인트: `/add-chart` 스킬로 차트 추가 규칙 통일, `viz-reviewer` 에이전트로 차트 품질 리뷰
 
 ### 4단계 — 웹 대시보드  `[MCP: Playwright, Context7]`
-- [ ] `app.py`: 사이드바 필터(연도 범위 슬라이더, 시도 멀티셀렉트)
+- [x] `app.py`: 사이드바 필터(연도 범위 슬라이더, 시도 멀티셀렉트)
 - [ ] KPI 카드(총 건수, 총 피해면적, 최다 발생 시도)
 - [ ] 탭 구성: 추이 / 지역 / 월별 패턴 / 지도
 - 💡 실습 포인트: Context7 MCP로 최신 Streamlit 문서 조회, Playwright MCP로 실행 중인 대시보드 화면 자동 점검
