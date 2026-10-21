@@ -5,7 +5,7 @@
 
 이 프로젝트는 **바이브 코딩 실습용**으로, Claude Code의 `CLAUDE.md`(프로젝트 메모리), skills, agents(서브에이전트), hooks, MCP를 활용해 단계별(수집 → 분석 → 시각화 → 대시보드 → 배포)로 만들었습니다.
 
-> 배포 URL: (배포 후 추가)
+> 배포 URL: https://wildfire-dashboard-h67fydbx2pc6qchpdja3fl.streamlit.app
 
 <!-- 스크린샷을 docs/screenshot.png 에 추가한 뒤 아래 줄의 주석을 풀어 주세요.
 ![대시보드 스크린샷](docs/screenshot.png)

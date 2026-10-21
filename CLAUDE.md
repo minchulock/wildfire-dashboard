@@ -153,11 +153,12 @@ ruff check . && ruff format .       # 린트/포맷 (hook이 자동 실행하지
 - 💡 실습 포인트: Context7 MCP로 최신 Streamlit 문서 조회, Playwright MCP로 실행 중인 대시보드 화면 자동 점검
 
 ### 5단계 — 배포  `[MCP: GitHub] [Skills] [Subagents]`
-- [ ] `requirements.txt` 버전 고정, `.gitignore` 정리
-- [ ] GitHub 저장소 생성 및 push (GitHub MCP 또는 `gh`)
-- [ ] `data/processed/` 결과 파일 커밋 (배포 앱은 API를 호출하지 않음)
-- [ ] Streamlit Community Cloud 연결 → (필요 시) Secrets 등록 → 공개 URL 확보
-- [ ] README에 URL·스크린샷·데이터 출처 기재
+- [x] `requirements.txt` 버전 고정(`requirements-dev.txt` 분리), `.gitignore` 정리
+- [x] GitHub 저장소 생성 및 push (`gh`) → https://github.com/minchulock/wildfire-dashboard
+- [x] `data/processed/` 결과 파일 커밋 (배포 앱은 API를 호출하지 않음)
+- [x] Streamlit Community Cloud 연결 → 공개 URL 확보 (Secrets 불필요) → https://wildfire-dashboard-h67fydbx2pc6qchpdja3fl.streamlit.app
+- [x] README에 URL·데이터 출처 기재
+- [ ] README 스크린샷 추가 (`docs/screenshot.png` 넣고 README 주석 해제)
 - 💡 실습 포인트: `/deploy-check` 스킬로 배포 전 점검, `deploy-engineer` 에이전트에게 배포 문서 작성 위임
 
 ## 8. Claude Code 확장 기능 맵
